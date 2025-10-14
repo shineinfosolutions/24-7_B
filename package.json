@@ -1,0 +1,32 @@
+{
+  "name": "backend",
+  "type": "module",
+  "description": "server",
+  "main": "server.js",
+  
+    "version": "1",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdarshCHMMMUT/backend.git"
+  },
+  "author": "adarsh only",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AdarshCHMMMUT/backend/issues"
+  },
+  "homepage": "https://github.com/AdarshCHMMMUT/backend#readme",
+  "dependencies": {
+    "cookie": "^1.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mongoose": "^8.14.3",
+    "nodemon": "^3.1.10",
+    "parser": "^0.1.4"
+  }
+  
+}
