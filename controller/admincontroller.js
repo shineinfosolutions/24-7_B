@@ -1,8 +1,6 @@
-import Addonmodel from "../models/addonmodel.js";
 import adminmodel from "../models/adminmodel.js";
 import couponModel from "../models/couponmodel.js";
 import Variationmodel from "../models/variationmodel.js";
-import orderModel from "../models/ordermodel.js";
 import userModel from "../models/usermodel.js";
 
 
@@ -91,24 +89,7 @@ export const getvariations = async(req,res) =>
   }
 
 }
-export const addaddon = async(req,res)=>
-{
-  try{
-      const {name, price, description, category, veg, available } = req.body;
-      // take itemdId
-      const addon = await Addonmodel.create({name, price, description, category, veg, available})
-      // const updatedItem = await Itemmodel.findByIdAndUpdate(
-      //   itemId,
-      //   { $push: { addons: addon._id } },
-      //   { new: true }
-      // );
-      res.status(200).json({message:"addon added successfully", addon})
-  }
-  catch(err)
-  {
-    res.status(500).json({message:"server error",err })
-  }
-}
+
 
 // export  const addvariation = async(req,res) =>
 // {
@@ -173,49 +154,7 @@ export const deletevariation = async(req,res) =>
     res.status(500).json({message:"server error", err: err.message})
   }
 }
-export const createOrder = async (req, res) => {
-  try{
-  const newOrder = new orderModel(req.body); 
-  const id = req.body.customer_id;
-  const savedOrder = await newOrder.save();
 
-  const updateduser = await userModel.findByIdAndUpdate(
-      id,
-      { $push: { orders: savedOrder._id } },
-      { new: true } 
-    );
-
-  await db.ref(`orders/${savedOrder._id}`).set({
-    status: "Placed",
-    timestamp: Date.now()
-  });
-
-  res.status(201).json({ message: "Order placed",  order: savedOrder, user: updateduser });
-}
-catch(err)
-{
-  res.status(500).json({message: `${err}`})
-}
-};
-
-export const updateStatus = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { newStatus } = req.body;
-    if (!newStatus) {
-      return res.status(400).json({ message: "newStatus is required in request body" });
-    }
-    console.log(orderId);
-    console.log(newStatus);
-    await db.ref(`orders/${orderId}/status`).set(newStatus);
-    await orderModel.findByIdAndUpdate(orderId, { status: newStatus });
-    
-    res.status(200).json({ message: "Status updated successfully" });
-  } catch (error) {
-    console.error("Error updating status:", error);
-    res.status(500).json({ message: "Failed to update status", error: error.message });
-  }
-};
 
 
 

@@ -8,6 +8,9 @@ import userRouter from "./routes/userRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
 import categoryRouter from "./routes/categoryRoutes.js";
 import itemRouter from "./routes/itemRoutes.js";
+import orderRouter from "./routes/orderRoutes.js";
+import addonRouter from "./routes/addonRoutes.js";
+import addressRouter from "./routes/addressRoutes.js";
 
 
 const app = express();
@@ -33,6 +36,9 @@ app.use('/api/user',userRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/category', categoryRouter)
 app.use('/api/item', itemRouter)
+app.use('/api/order', orderRouter)
+app.use('/api/addon', addonRouter)
+app.use('/api/address', addressRouter)
 
 
 app.listen(port, ()=>console.log(`Server started on PORT: ${port}`));

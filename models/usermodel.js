@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const customerSchema = new mongoose.Schema({
   name: { type: String, required: false, trim: true },
-  firebaseUid: { type: String, required: true },
   email: { type: String, lowercase: true, required: false },
   phone: { type: Number, required: false },
   dob: { type: String, required: false },
