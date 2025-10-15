@@ -4,6 +4,7 @@ import 'dotenv/config';
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongodb.js";
 
+
 import userRouter from "./routes/userRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
 import categoryRouter from "./routes/categoryRoutes.js";
@@ -17,11 +18,14 @@ import variationRouter from "./routes/variationRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000
+
+
+
 connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ['http://localhost:5173','zomato-frontend-blush.vercel.app'],
+  origin: ['http://localhost:5173','http://zomato-frontend-blush.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

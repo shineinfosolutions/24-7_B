@@ -1,9 +1,28 @@
 import categoryModel from "../models/categorymodel.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const addCategory = async (req, res) => {
   try {
     const { category, id } = req.body;
-    const newCategory = await categoryModel.create({ category, id });
+    let imageUrl = null;
+    
+    if (req.file) {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'categories' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      
+      const uploadResult = await uploadPromise;
+      imageUrl = uploadResult.secure_url;
+    }
+    
+    const newCategory = await categoryModel.create({ category, id, image: imageUrl });
     res.status(200).json({ message: "Category added successfully", category: newCategory });
   } catch (err) {
     res.status(500).json({ message: "Server error", err: err.message });
