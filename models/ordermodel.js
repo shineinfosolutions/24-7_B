@@ -17,6 +17,14 @@ const orderSchema = new mongoose.Schema({
   delivery_partner_id: {type: mongoose.Schema.Types.ObjectId,ref: 'DeliveryPartner',default: null},
   delivery_boy: {type: String,enum: ['Own-Delivery', 'Partner-Delivery'], default: 'Own-Delivery'},
   order_source: {type: String,enum: ['Online', 'offline'], default: 'Online'},
+  status_timestamps: {
+    pending: {type: Date, default: Date.now},
+    accepted: {type: Date},
+    preparing: {type: Date},
+    prepared: {type: Date},
+    out_for_delivery: {type: Date},
+    delivered: {type: Date}
+  }
 }, { timestamps: true });
 
 const orderModel = mongoose.model('Order', orderSchema);
