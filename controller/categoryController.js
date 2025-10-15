@@ -7,14 +7,6 @@ export const addCategory = async (req, res) => {
     let imageUrl = null;
     
     if (req.file) {
-      const result = await cloudinary.uploader.upload_stream(
-        { folder: 'categories' },
-        (error, result) => {
-          if (error) throw error;
-          return result;
-        }
-      );
-      
       const uploadPromise = new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { folder: 'categories' },

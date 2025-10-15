@@ -4,11 +4,12 @@ import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
   try {
-<<<<<<< HEAD
     const { name, price, description, longDescription, veg, category } = req.body;
-=======
-    const { name, price, originalPrice, quantity, description, longDescription, image, veg, rating, category, variation, addon } = req.body;
->>>>>>> 6a2853c23e9c6853d2401b2babe6edbce184fd73
+    
+    // Input validation
+    if (!name || !price || !category) {
+      return res.status(400).json({ message: "Name, price, and category are required" });
+    }
     
     // Validate category exists
     const categoryExists = await categoryModel.findById(category);
@@ -16,7 +17,6 @@ export const addItem = async (req, res) => {
       return res.status(400).json({ message: "Invalid category ID" });
     }
     
-<<<<<<< HEAD
     let imageUrl = null;
     if (req.file) {
       const uploadPromise = new Promise((resolve, reject) => {
@@ -35,9 +35,6 @@ export const addItem = async (req, res) => {
     }
     
     const item = await Itemmodel.create({ name, price, description, longDescription, image: imageUrl, veg, category });
-=======
-    const item = await Itemmodel.create({ name, price, originalPrice, quantity, description, longDescription, image, veg, rating, category, variation, addon });
->>>>>>> 6a2853c23e9c6853d2401b2babe6edbce184fd73
     res.status(200).json({ message: "Item added successfully", item });
   } catch (err) {
     res.status(500).json({ message: "Server error", err: err.message });
@@ -56,6 +53,12 @@ export const getItems = async (req, res) => {
 export const deleteItem = async (req, res) => {
   try {
     const { itemId } = req.body;
+    
+    // Input validation
+    if (!itemId) {
+      return res.status(400).json({ message: "Item ID is required" });
+    }
+    
     const item = await Itemmodel.findByIdAndDelete(itemId);
     if (!item) {
       return res.status(404).json({ message: "Item not found" });

@@ -3,7 +3,7 @@ import cors from "cors";
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongodb.js";
-import { v2 as cloudinary } from 'cloudinary';
+
 
 import userRouter from "./routes/userRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
@@ -19,16 +19,7 @@ import cartRouter from "./routes/cartRoutes.js";
 const app = express();
 const port = process.env.PORT || 4000
 
-// Configure Cloudinary
-try {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-  });
-} catch (error) {
-  console.error('Cloudinary configuration failed:', error);
-}
+
 
 connectDB();
 app.use(express.json());
