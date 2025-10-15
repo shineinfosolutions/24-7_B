@@ -10,6 +10,7 @@ const itemSchema = new mongoose.Schema({
     image:{type:String},
     veg:{type:Boolean},
     rating:{type:Number},
+    deliveryTime:{type:Number, default: 30},
     category: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true},
     variation: [{ type: mongoose.Schema.Types.ObjectId, ref:'variations'}],
     addon: [{ type: mongoose.Schema.Types.ObjectId, ref:'addon'}]
