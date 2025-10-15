@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/AdarshCHMMMUT/backend#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cloudinary": "^2.5.1",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
@@ -26,6 +27,7 @@
     "express": "^5.1.0",
     "mongoose": "^8.14.3",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^7.0.9",
     "nodemon": "^3.1.10",
     "parser": "^0.1.4"
   }

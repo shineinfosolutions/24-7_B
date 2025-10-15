@@ -36,6 +36,42 @@ export const createOrder = async (req, res) => {
       { new: true }
     );
 
+    // Auto-update order status
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(savedOrder._id, {
+        order_status: 2,
+        'status_timestamps.accepted': new Date()
+      });
+    }, 2 * 60000);
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(savedOrder._id, {
+        order_status: 3,
+        'status_timestamps.preparing': new Date()
+      });
+    }, 5 * 60000);
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(savedOrder._id, {
+        order_status: 4,
+        'status_timestamps.prepared': new Date()
+      });
+    }, 18 * 60000);
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(savedOrder._id, {
+        order_status: 5,
+        'status_timestamps.out_for_delivery': new Date()
+      });
+    }, 20 * 60000);
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(savedOrder._id, {
+        order_status: 6,
+        'status_timestamps.delivered': new Date()
+      });
+    }, 40 * 60000);
+
     res.status(201).json({ message: "Order placed", order: savedOrder, user: updateduser });
   } catch (err) {
     res.status(500).json({ message: `${err}` });
@@ -50,11 +86,75 @@ export const updateStatus = async (req, res) => {
       return res.status(400).json({ message: "newStatus is required in request body" });
     }
     
-    await orderModel.findByIdAndUpdate(orderId, { status: newStatus });
+    const updateData = { order_status: newStatus };
+    const statusMap = {
+      2: 'accepted',
+      3: 'preparing', 
+      4: 'prepared',
+      5: 'out_for_delivery',
+      6: 'delivered'
+    };
+    
+    if (statusMap[newStatus]) {
+      updateData[`status_timestamps.${statusMap[newStatus]}`] = new Date();
+    }
+    
+    await orderModel.findByIdAndUpdate(orderId, updateData);
     res.status(200).json({ message: "Status updated successfully" });
   } catch (error) {
     console.error("Error updating status:", error);
     res.status(500).json({ message: "Failed to update status", error: error.message });
+  }
+};
+
+export const autoUpdateOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await orderModel.findById(orderId);
+    
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    const now = new Date();
+    const updateData = {
+      order_status: 2,
+      'status_timestamps.accepted': new Date(now.getTime() + 2 * 60000)
+    };
+    
+    await orderModel.findByIdAndUpdate(orderId, updateData);
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(orderId, {
+        order_status: 3,
+        'status_timestamps.preparing': new Date()
+      });
+    }, 3 * 60000);
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(orderId, {
+        order_status: 4,
+        'status_timestamps.prepared': new Date()
+      });
+    }, 16 * 60000);
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(orderId, {
+        order_status: 5,
+        'status_timestamps.out_for_delivery': new Date()
+      });
+    }, 18 * 60000);
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(orderId, {
+        order_status: 6,
+        'status_timestamps.delivered': new Date()
+      });
+    }, 38 * 60000);
+    
+    res.status(200).json({ message: "Auto-update started for order" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to start auto-update", error: error.message });
   }
 };
 
@@ -85,5 +185,72 @@ export const getAllOrders = async (req, res) => {
     res.status(200).json({ message: "Orders fetched successfully", orders });
   } catch (err) {
     res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
+
+export const getOrderWithTimestamps = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await orderModel.findById(orderId).populate('customer_id');
+    
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    const statusNames = {
+      1: 'PENDING',
+      2: 'ACCEPTED', 
+      3: 'ORDER PREPARING',
+      4: 'ORDER PREPARED',
+      5: 'OUT FOR DELIVERY',
+      6: 'ORDER DELIVERED'
+    };
+    
+    const response = {
+      ...order.toObject(),
+      current_status: statusNames[order.order_status],
+      timeline: {
+        pending: order.status_timestamps.pending,
+        accepted: order.status_timestamps.accepted,
+        preparing: order.status_timestamps.preparing,
+        prepared: order.status_timestamps.prepared,
+        out_for_delivery: order.status_timestamps.out_for_delivery,
+        delivered: order.status_timestamps.delivered
+      }
+    };
+    
+    res.status(200).json({ message: "Order fetched successfully", order: response });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const testAutoUpdate = async (req, res) => {
+  try {
+    const testOrder = new orderModel({
+      customer_id: '507f1f77bcf86cd799439011',
+      address_id: '507f1f77bcf86cd799439012', 
+      item_ids: ['507f1f77bcf86cd799439013'],
+      gst: 18,
+      amount: 299,
+      payment_status: 'success'
+    });
+    
+    const savedOrder = await testOrder.save();
+    
+    setTimeout(async () => {
+      await orderModel.findByIdAndUpdate(savedOrder._id, {
+        order_status: 2,
+        'status_timestamps.accepted': new Date()
+      });
+      console.log('Order accepted:', savedOrder._id);
+    }, 10000);
+    
+    res.status(201).json({ 
+      message: "Test order created - will auto-update in 10 seconds", 
+      orderId: savedOrder._id 
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Test failed", error: error.message });
   }
 };
