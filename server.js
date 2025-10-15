@@ -12,6 +12,7 @@ import orderRouter from "./routes/orderRoutes.js";
 import addonRouter from "./routes/addonRoutes.js";
 import addressRouter from "./routes/addressRoutes.js";
 import variationRouter from "./routes/variationRoutes.js";
+import cartRouter from "./routes/cartRoutes.js";
 
 
 const app = express();
@@ -20,7 +21,7 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ['http://localhost:5173','https://24-7-b.vercel.app'],
+  origin: ['http://localhost:5173','zomato-frontend-blush.vercel.app'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -41,6 +42,7 @@ app.use('/api/order', orderRouter)
 app.use('/api/addon', addonRouter)
 app.use('/api/address', addressRouter)
 app.use('/api/variation', variationRouter)
+app.use('/api/cart', cartRouter)
 
 
 app.listen(port, ()=>console.log(`Server started on PORT: ${port}`));
