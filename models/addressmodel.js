@@ -12,5 +12,5 @@ const addressSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const addressModel = mongoose.models.Address || mongoose.model('Address', addressSchema);
-export default addressModel;
+export default addressModel;    
 
