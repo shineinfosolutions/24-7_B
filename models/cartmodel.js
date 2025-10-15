@@ -6,7 +6,7 @@ const cartSchema = new mongoose.Schema({
     item: { type: mongoose.Schema.Types.ObjectId, ref: 'items', required: true },
     quantity: { type: Number, default: 1 },
     variation: { type: mongoose.Schema.Types.ObjectId, ref: 'variations' },
-    addons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Addonmodel' }]
+    addons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'addon' }]
   }]
 }, {
   timestamps: true
