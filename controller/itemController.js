@@ -50,6 +50,38 @@ export const getItems = async (req, res) => {
   }
 };
 
+export const getFilteredItems = async (req, res) => {
+  try {
+    const { veg } = req.query;
+    const filter = veg !== undefined ? { veg: veg === 'true' } : {};
+    const itemsdata = await Itemmodel.find(filter).populate('variation').populate('category').lean();
+    return res.json({ success: true, itemsdata });
+  } catch (error) {
+    return res.json({ success: false, message: `Unable to get filtered data ${error.message}` });
+  }
+};
+
+export const getSortedItems = async (req, res) => {
+  try {
+    const { veg, sortBy } = req.query;
+    const filter = veg !== undefined ? { veg: veg === 'true' } : {};
+    
+    let sortOption = {};
+    switch(sortBy) {
+      case 'rating': sortOption = { rating: -1 }; break;
+      case 'price_low': sortOption = { price: 1 }; break;
+      case 'price_high': sortOption = { price: -1 }; break;
+      case 'delivery': sortOption = { deliveryTime: 1 }; break;
+      default: sortOption = { rating: -1 };
+    }
+    
+    const itemsdata = await Itemmodel.find(filter).sort(sortOption).populate('variation').populate('category').lean();
+    return res.json({ success: true, itemsdata });
+  } catch (error) {
+    return res.json({ success: false, message: `Unable to get sorted data ${error.message}` });
+  }
+};
+
 export const deleteItem = async (req, res) => {
   try {
     const { itemId } = req.body;
