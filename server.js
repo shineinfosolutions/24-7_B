@@ -13,6 +13,7 @@ import orderRouter from "./routes/orderRoutes.js";
 import addonRouter from "./routes/addonRoutes.js";
 import addressRouter from "./routes/addressRoutes.js";
 import variationRouter from "./routes/variationRoutes.js";
+import searchRouter from "./routes/searchRoutes.js";
 // import cartRouter from "./routes/cartRoutes.js";
 
 
@@ -25,7 +26,7 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ['http://localhost:5173','http://zomato-frontend-blush.vercel.app'],
+  origin: ['http://localhost:5173','http://zomato-frontend-blush.vercel.app', 'http://127.0.0.1:5500', 'null'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -46,6 +47,7 @@ app.use('/api/order', orderRouter)
 app.use('/api/addon', addonRouter)
 app.use('/api/address', addressRouter)
 app.use('/api/variation', variationRouter)
+app.use('/api/search', searchRouter)
 // app.use('/api/cart', cartRouter)
 
 
