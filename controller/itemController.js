@@ -50,6 +50,17 @@ export const getItems = async (req, res) => {
   }
 };
 
+export const getFilteredItems = async (req, res) => {
+  try {
+    const { veg } = req.query;
+    const filter = veg !== undefined ? { veg: veg === 'true' } : {};
+    const itemsdata = await Itemmodel.find(filter).populate('variation').populate('category').lean();
+    return res.json({ success: true, itemsdata });
+  } catch (error) {
+    return res.json({ success: false, message: `Unable to get filtered data ${error.message}` });
+  }
+};
+
 export const deleteItem = async (req, res) => {
   try {
     const { itemId } = req.body;
