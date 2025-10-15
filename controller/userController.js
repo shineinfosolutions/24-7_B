@@ -1,5 +1,129 @@
 import userModel from "../models/usermodel.js";
 import wishmodel from "../models/wishmodel.js";
+import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+});
+
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, phone, password } = req.body;
+    
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser && existingUser.isVerified) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+    
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+    
+    if (existingUser) {
+      existingUser.otp = otp;
+      existingUser.otpExpiry = otpExpiry;
+      existingUser.password = hashedPassword;
+      await existingUser.save();
+    } else {
+      await userModel.create({
+        name,
+        email,
+        phone,
+        password: hashedPassword,
+        otp,
+        otpExpiry,
+        isVerified: false
+      });
+    }
+    
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Email Verification - Your OTP Code',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #333; margin: 0;">Email Verification</h2>
+          </div>
+          <div style="background: #f8f9fa; padding: 30px; border-radius: 8px; text-align: center;">
+            <p style="color: #666; font-size: 16px; margin-bottom: 20px;">Your verification code is:</p>
+            <div style="background: #007bff; color: white; padding: 15px 30px; border-radius: 6px; display: inline-block; margin: 20px 0;">
+              <h1 style="margin: 0; font-size: 28px; letter-spacing: 3px;">${otp}</h1>
+            </div>
+            <p style="color: #666; font-size: 14px; margin-top: 20px;">This code will expire in 5 minutes</p>
+          </div>
+          <div style="margin-top: 30px; text-align: center;">
+            <p style="color: #999; font-size: 12px;">If you didn't request this verification, please ignore this email.</p>
+          </div>
+        </div>
+      `
+    };
+    
+    await transporter.sendMail(mailOptions);
+    
+    res.status(200).json({ 
+      message: "OTP sent to your email address", 
+      email 
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
+
+export const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or OTP expired" });
+    }
+    
+    if (user.otp !== otp || user.otpExpiry < new Date()) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+    
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+    
+    res.status(201).json({ message: "User registered successfully", user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
+
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await userModel.findOne({ email });
+    
+    if (!user || !user.isVerified) {
+      return res.status(400).json({ message: "Invalid credentials or unverified account" });
+    }
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    
+    res.status(200).json({ message: "Login successful", user: { id: user._id, name: user.name, email: user.email } });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
 
 export const addUser = async (req, res) => {
   try {
@@ -13,8 +137,8 @@ export const addUser = async (req, res) => {
 export const getUserData = async(req,res) =>
 {
   try{
-       const {firebaseUid}  = req.body;
-       const user  = await userModel.findOne({firebaseUid});
+       const {email}  = req.body;
+       const user  = await userModel.findOne({email});
        if(!user)return res.json({success:false, message: 'user not found'});
     
 
@@ -68,8 +192,8 @@ export const addwish = async (req, res) => {
 
 export const getAddresses = async (req, res) => {
   try {
-    const { firebaseUid } = req.body;
-    const user = await userModel.findOne({ firebaseUid }).populate('addresses');  
+    const { email } = req.body;
+    const user = await userModel.findOne({ email }).populate('addresses');  
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -80,8 +204,8 @@ export const getAddresses = async (req, res) => {
 }
 export const deleteaddress = async (req, res) => {
   try {
-    const { firebaseUid, addressId } = req.body;
-    const user = await userModel.findOne({ firebaseUid }); 
+    const { email, addressId } = req.body;
+    const user = await userModel.findOne({ email }); 
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
