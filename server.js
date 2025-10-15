@@ -13,7 +13,7 @@ import orderRouter from "./routes/orderRoutes.js";
 import addonRouter from "./routes/addonRoutes.js";
 import addressRouter from "./routes/addressRoutes.js";
 import variationRouter from "./routes/variationRoutes.js";
-import cartRouter from "./routes/cartRoutes.js";
+// import cartRouter from "./routes/cartRoutes.js";
 
 
 const app = express();
@@ -46,7 +46,7 @@ app.use('/api/order', orderRouter)
 app.use('/api/addon', addonRouter)
 app.use('/api/address', addressRouter)
 app.use('/api/variation', variationRouter)
-app.use('/api/cart', cartRouter)
+// app.use('/api/cart', cartRouter)
 
 
 app.listen(port, ()=>console.log(`Server started on PORT: ${port}`));
