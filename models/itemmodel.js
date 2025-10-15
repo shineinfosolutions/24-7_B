@@ -12,7 +12,7 @@ const itemSchema = new mongoose.Schema({
     rating:{type:Number},
     category: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true},
     variation: [{ type: mongoose.Schema.Types.ObjectId, ref:'variations'}],
-    addon: [{ type: mongoose.Schema.Types.ObjectId,ref :'Addonmodel'}]
+    addon: [{ type: mongoose.Schema.Types.ObjectId, ref:'addon'}]
 })
 
 const Itemmodel =mongoose.models.items || mongoose.model('items',itemSchema);
