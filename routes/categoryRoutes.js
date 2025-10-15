@@ -4,7 +4,13 @@ import upload from "../middleware/upload.js";
 
 const categoryRouter = express.Router();
 
-categoryRouter.post('/add', upload.single('image'), addCategory);
+categoryRouter.post('/add', upload.single('image'), (req, res, next) => {
+  try {
+    addCategory(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
 categoryRouter.get('/get', getCategories);
 categoryRouter.delete('/delete', deleteCategory);
 
