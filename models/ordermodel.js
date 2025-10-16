@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
   customer_id: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
-  address_id: { type: mongoose.Schema.Types.ObjectId,ref: 'Address',required: true},
+  address_id: { type: mongoose.Schema.Types.ObjectId,ref: 'UserAddress',required: true},
   item_ids: [{type: mongoose.Schema.Types.ObjectId,ref: 'Item', required: true }],
   is_variation: {type: Boolean,default: false },
   variation: {type: mongoose.Schema.Types.Mixed, default: null},

@@ -11,7 +11,7 @@ const customerSchema = new mongoose.Schema({
   otp: { type: String, required: false },
   otpExpiry: { type: Date, required: false },
   isVerified: { type: Boolean, default: false },
-  addresses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Address' }],
+  addresses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'UserAddress' }],
   coupons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Coupon' }],
   complaints: [{
     complaint_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Complaint' },
