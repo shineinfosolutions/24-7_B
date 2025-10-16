@@ -1,11 +1,11 @@
-// import express from 'express';
-// import { addToCart, getCart, removeFromCart, updateCartQuantity } from '../controller/cartController.js';
+import express from 'express';
+import { addToCart, getCart, removeFromCart, updateCartQuantity } from '../controller/cartController.js';
 
-// const cartRouter = express.Router();
+const cartRouter = express.Router();
 
-// cartRouter.post('/add', addToCart);
-// cartRouter.post('/get', getCart);
-// cartRouter.post('/remove', removeFromCart);
-// cartRouter.post('/update', updateCartQuantity);
+cartRouter.post('/add', addToCart);
+cartRouter.post('/get', getCart);
+cartRouter.post('/remove', removeFromCart);
+cartRouter.post('/update', updateCartQuantity);
 
-// export default cartRouter;
+export default cartRouter;
