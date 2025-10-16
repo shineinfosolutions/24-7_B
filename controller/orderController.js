@@ -224,33 +224,3 @@ export const getOrderWithTimestamps = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
-export const testAutoUpdate = async (req, res) => {
-  try {
-    const testOrder = new orderModel({
-      customer_id: '507f1f77bcf86cd799439011',
-      address_id: '507f1f77bcf86cd799439012', 
-      item_ids: ['507f1f77bcf86cd799439013'],
-      gst: 18,
-      amount: 299,
-      payment_status: 'success'
-    });
-    
-    const savedOrder = await testOrder.save();
-    
-    setTimeout(async () => {
-      await orderModel.findByIdAndUpdate(savedOrder._id, {
-        order_status: 2,
-        'status_timestamps.accepted': new Date()
-      });
-      console.log('Order accepted:', savedOrder._id);
-    }, 10000);
-    
-    res.status(201).json({ 
-      message: "Test order created - will auto-update in 10 seconds", 
-      orderId: savedOrder._id 
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Test failed", error: error.message });
-  }
-};
