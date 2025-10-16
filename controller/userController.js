@@ -138,7 +138,7 @@ export const getUserData = async(req,res) =>
 {
   try{
        const {email}  = req.body;
-       const user  = await userModel.findOne({email});
+       const user  = await userModel.findOne({email}).populate('addresses');
        if(!user)return res.json({success:false, message: 'user not found'});
     
 
