@@ -169,6 +169,18 @@ export const getwish = async(req, res) =>
   }
 }
 
+export const getWishlistByUserId = async(req, res) => {
+  try{
+    const {userId} = req.params;
+    const user = await wishmodel.findOne({user:userId}).populate('wishlist');
+    if(!user) return res.json({success:false, message: 'user not found'});
+    return res.json({success:true, wishlist: user.wishlist});
+  }
+  catch(error){
+    return res.json({success:false, message: error.message});
+  }
+}
+
 export const addwish = async (req, res) => {
   try {
     const { userId, itemId } = req.body;
