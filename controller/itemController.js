@@ -82,6 +82,41 @@ export const getSortedItems = async (req, res) => {
   }
 };
 
+export const updateItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, price, description, longDescription, veg, category } = req.body;
+    
+    let imageUrl;
+    if (req.file) {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'menu-items' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      
+      const uploadResult = await uploadPromise;
+      imageUrl = uploadResult.secure_url;
+    }
+    
+    const updateData = { name, price, description, longDescription, veg, category };
+    if (imageUrl) updateData.image = imageUrl;
+    
+    const item = await Itemmodel.findByIdAndUpdate(id, updateData, { new: true });
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+    res.status(200).json({ message: "Item updated successfully", item });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
+
 export const deleteItem = async (req, res) => {
   try {
     const { itemId } = req.body;
