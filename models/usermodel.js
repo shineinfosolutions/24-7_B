@@ -17,7 +17,29 @@ const customerSchema = new mongoose.Schema({
     complaint_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Complaint' },
     status: { type: String, enum: ['Open', 'Resolved', 'Pending'], default: 'Open' }
   }],
-  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }]
+  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
+  settings: {
+    type: {
+      vegMode: { type: Boolean, default: false },
+      showPersonalised: { type: Boolean, default: true },
+      appearance: { type: String, enum: ['Light', 'Dark'], default: 'Light' },
+      hearFromRestaurants: { type: Boolean, default: true },
+      manageRecommendations: { type: Boolean, default: true },
+      orderOnTrain: { type: Boolean, default: false },
+      onlineOrderingHelp: { type: Boolean, default: true }
+    },
+    default: () => ({
+      vegMode: false,
+      showPersonalised: true,
+      appearance: 'Light',
+      hearFromRestaurants: true,
+      manageRecommendations: true,
+      orderOnTrain: false,
+      onlineOrderingHelp: true
+    })
+  },
+  hiddenRestaurants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' }],
+  rating: { type: Number, min: 1, max: 5, default: null }
 }, {
   timestamps: true
 });
