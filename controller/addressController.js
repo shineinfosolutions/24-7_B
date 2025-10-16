@@ -50,6 +50,38 @@ export const getAddresses = async (req, res) => {
   }
 };
 
+export const updateAddress = async (req, res) => {
+  try {
+    const { addressId, type, nickname, fullAddress, house_no, street, landmark, city, state, postalCode, lat, lng, isDefault } = req.body;
+    
+    // Validate address exists
+    const existingAddress = await addressModel.findById(addressId);
+    if (!existingAddress) {
+      return res.status(404).json({ message: "Address not found" });
+    }
+    
+    // Validate nickname is provided when type is Other
+    if (type === 'Other' && !nickname) {
+      return res.status(400).json({ message: "Nickname is required when address type is Other" });
+    }
+    
+    // If this is set as default, remove default from other addresses
+    if (isDefault) {
+      await addressModel.updateMany({}, { isDefault: false });
+    }
+    
+    const updatedAddress = await addressModel.findByIdAndUpdate(
+      addressId,
+      { type, nickname, fullAddress, house_no, street, landmark, city, state, postalCode, lat, lng, isDefault },
+      { new: true }
+    );
+    
+    res.status(200).json({ message: "Address updated successfully", address: updatedAddress });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
+
 export const deleteAddress = async (req, res) => {
   try {
     const { userId, addressId } = req.body;
