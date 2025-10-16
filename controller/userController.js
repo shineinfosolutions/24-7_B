@@ -67,7 +67,7 @@ export const registerUser = async (req, res) => {
             <p style="color: #999; font-size: 12px;">If you didn't request this verification, please ignore this email.</p>
           </div>
         </div>
-      `
+      ` 
     };
     
     await transporter.sendMail(mailOptions);
@@ -213,6 +213,114 @@ export const deleteaddress = async (req, res) => {
     await user.save();
     return res.json({ success: true, message: 'Address deleted successfully', addresses: user.addresses });
   } catch (error) {  
+    return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+  }
+}
+
+export const getSettings = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    return res.json({ success: true, settings: user.settings, rating: user.rating });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+  }
+}
+
+export const updateSettings = async (req, res) => {
+  try {
+    const { email, settings } = req.body;
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    user.settings = { ...user.settings.toObject(), ...settings };
+    user.markModified('settings');
+    await user.save();
+    return res.json({ success: true, message: 'Settings updated successfully', settings: user.settings });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+  }
+}
+
+export const updateRating = async (req, res) => {
+  try {
+    const { email, rating } = req.body;
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    user.rating = rating;
+    await user.save();
+    return res.json({ success: true, message: 'Rating updated successfully', rating: user.rating });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+  }
+}
+
+export const hideRestaurant = async (req, res) => {
+  try {
+    const { email, restaurantId } = req.body;
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    if (!user.hiddenRestaurants.includes(restaurantId)) {
+      user.hiddenRestaurants.push(restaurantId);
+      await user.save();
+    }
+    return res.json({ success: true, message: 'Restaurant hidden successfully' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+  }
+}
+
+export const unhideRestaurant = async (req, res) => {
+  try {
+    const { email, restaurantId } = req.body;
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    user.hiddenRestaurants = user.hiddenRestaurants.filter(id => id.toString() !== restaurantId);
+    await user.save();
+    return res.json({ success: true, message: 'Restaurant unhidden successfully' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+  }
+}
+
+export const getHiddenRestaurants = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await userModel.findOne({ email }).populate('hiddenRestaurants');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    return res.json({ success: true, hiddenRestaurants: user.hiddenRestaurants });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+  }
+}
+
+export const updateEmail = async (req, res) => {
+  try {
+    const { currentEmail, newEmail } = req.body;
+    const existingUser = await userModel.findOne({ email: newEmail });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already exists' });
+    }
+    const user = await userModel.findOne({ email: currentEmail });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    user.email = newEmail;
+    await user.save();
+    return res.json({ success: true, message: 'Email updated successfully', email: user.email });
+  } catch (error) {
     return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
   }
 }

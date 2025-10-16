@@ -1,5 +1,5 @@
 import express from 'express'
-import { addUser, addwish, deleteaddress, getAddresses, getUserData, getwish, loginUser, registerUser, verifyOTP } from '../controller/userController.js';
+import { addUser, addwish, deleteaddress, getAddresses, getHiddenRestaurants, getSettings, getUserData, getwish, hideRestaurant, loginUser, registerUser, unhideRestaurant, updateEmail, updateRating, updateSettings, verifyOTP } from '../controller/userController.js';
 
 const userRouter = express.Router();
 
@@ -14,5 +14,14 @@ userRouter.get('/getwishlist',getwish)
 userRouter.post('/addwish',addwish)
 userRouter.post('/getaddresses', getAddresses);
 userRouter.post('/deleteaddress', deleteaddress);
+
+// Settings CRUD routes
+userRouter.get('/settings/:email', getSettings);
+userRouter.put('/settings', updateSettings);
+userRouter.put('/rating', updateRating);
+userRouter.put('/email', updateEmail);
+userRouter.post('/restaurant/hide', hideRestaurant);
+userRouter.delete('/restaurant/hide', unhideRestaurant);
+userRouter.get('/restaurants/hidden/:email', getHiddenRestaurants);
 
 export default userRouter;
