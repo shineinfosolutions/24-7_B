@@ -1,5 +1,6 @@
 import orderModel from "../models/ordermodel.js";
 import userModel from "../models/usermodel.js";
+import "../models/usermodel.js"; // Ensure model is registered
 import addressModel from "../models/addressmodel.js";
 import Itemmodel from "../models/itemmodel.js";
 
@@ -160,20 +161,10 @@ export const autoUpdateOrder = async (req, res) => {
 
 export const getOrders = async (req, res) => {
   try {
-    const { firebaseUid } = req.body;
-    const user = await userModel
-      .findOne({ firebaseUid })
-      .populate({
-        path: 'orders',
-        populate: {
-          path: 'items',
-        },
-      });
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    return res.json({ success: true, orders: user.orders });
+    const { customer_id } = req.body;
+    
+    const orders = await orderModel.find({ customer_id }).sort({ createdAt: -1 });
+    return res.json({ success: true, orders });
   } catch (error) {
     return res.status(500).json({ success: false, message: `Server error: ${error.message}` });
   }
