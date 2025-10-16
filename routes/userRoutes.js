@@ -14,7 +14,6 @@ userRouter.get('/getwishlist',getwish)
 userRouter.post('/addwish',addwish)
 userRouter.post('/getaddresses', getAddresses);
 userRouter.post('/deleteaddress', deleteaddress);
-
 // Settings CRUD routes
 userRouter.get('/settings/:email', getSettings);
 userRouter.put('/settings', updateSettings);
