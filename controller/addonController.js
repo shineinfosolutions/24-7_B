@@ -51,3 +51,31 @@ export const deleteAddon = async (req, res) => {
     res.status(500).json({ message: "Server error", err: err.message });
   }
 };
+
+export const updateAddon = async (req, res) => {
+  try {
+    const { id } = req.params; // Addon ID from URL
+    const { name, price, description, category, veg, available } = req.body;
+
+    // Find and update the addon
+    const updatedAddon = await Addonmodel.findByIdAndUpdate(
+      id,
+      { name, price, description, category, veg, available },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedAddon) {
+      return res.status(404).json({ message: "Addon not found" });
+    }
+
+    res.status(200).json({
+      message: "Addon updated successfully",
+      addon: updatedAddon,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+      err: err.message,
+    });
+  }
+};
