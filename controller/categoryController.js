@@ -38,6 +38,41 @@ export const getCategories = async (req, res) => {
   }
 };
 
+export const updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category } = req.body;
+    
+    let imageUrl;
+    if (req.file) {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'categories' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      
+      const uploadResult = await uploadPromise;
+      imageUrl = uploadResult.secure_url;
+    }
+    
+    const updateData = { category };
+    if (imageUrl) updateData.image = imageUrl;
+    
+    const updatedCategory = await categoryModel.findByIdAndUpdate(id, updateData, { new: true });
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+    res.status(200).json({ message: "Category updated successfully", category: updatedCategory });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
+
 export const deleteCategory = async (req, res) => {
   try {
     const { categoryId } = req.body;
