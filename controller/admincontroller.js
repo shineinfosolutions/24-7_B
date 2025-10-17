@@ -3,7 +3,6 @@ import couponModel from "../models/couponmodel.js";
 import Variationmodel from "../models/variationmodel.js";
 import userModel from "../models/usermodel.js";
 
-
 export const adminLogin = async(req,res) =>
 {
   try{
@@ -77,12 +76,6 @@ export const getstaffs = async(req, res) =>
     res.status(500).json({message:"server error"})
   }
 }
-
-
-
-
-
-
 
 // export const deletecategory = async(req,res) =>
 // {
