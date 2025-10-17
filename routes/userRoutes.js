@@ -1,10 +1,10 @@
 import express from 'express'
-import { addUser, addwish, deleteaddress, getAddresses, getHiddenRestaurants, getSettings, getUserData, getwish, getWishlistByUserId, hideRestaurant, loginUser, registerUser, unhideRestaurant, updateEmail, updateRating, updateSettings, verifyOTP } from '../controller/userController.js';
+import { addUser, addwish, deleteaddress, getAddresses, getHiddenRestaurants, getSettings, getUserData, getwish, getWishlistByUserId, hideRestaurant, loginUser, registerUser, unhideRestaurant, updateEmail, updateRating, updateSettings } from '../controller/userController.js';
 
 const userRouter = express.Router();
 
 userRouter.post('/register', registerUser)
-userRouter.post('/verify-otp', verifyOTP)
+//userRouter.post('/verify-otp', verifyOTP)
 userRouter.post('/login', loginUser)
 userRouter.post('/add', addUser)
 userRouter.post('/data',  getUserData)
