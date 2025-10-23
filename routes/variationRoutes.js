@@ -5,7 +5,7 @@ const variationRouter = express.Router();
 
 variationRouter.post('/add', addVariation);
 variationRouter.get('/get', getVariations);
-variationRouter.delete('/delete', deleteVariation);
+variationRouter.delete('/delete/:id', deleteVariation);
 variationRouter.put("/update/:id", updateVariation); 
 
 export default variationRouter;

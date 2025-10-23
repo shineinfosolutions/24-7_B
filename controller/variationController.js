@@ -34,16 +34,17 @@ export const getVariations = async (req, res) => {
 
 export const deleteVariation = async (req, res) => {
   try {
-    const { variationId, itemId } = req.body;
+    const { id } = req.params;
+    const { itemId } = req.body;
     
-    const variation = await Variationmodel.findByIdAndDelete(variationId);
+    const variation = await Variationmodel.findByIdAndDelete(id);
     if (!variation) {
       return res.status(404).json({ message: "Variation not found" });
     }
     
     // Remove variation from item if itemId provided
     if (itemId) {
-      await Itemmodel.findByIdAndUpdate(itemId, { $pull: { variation: variationId } });
+      await Itemmodel.findByIdAndUpdate(itemId, { $pull: { variation: id } });
     }
     
     res.status(200).json({ message: "Variation deleted successfully", variation });
