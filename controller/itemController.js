@@ -1,5 +1,6 @@
 import Itemmodel from "../models/itemmodel.js";
 import categoryModel from "../models/categorymodel.js";
+import Addonmodel from "../models/addonmodel.js";
 import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
@@ -44,6 +45,15 @@ export const addItem = async (req, res) => {
 export const getItems = async (req, res) => {
   try {
     const itemsdata = await Itemmodel.find().populate('variation').populate('category').lean();
+    
+    // Manually populate addons
+    for (let item of itemsdata) {
+      if (item.addon && item.addon.length > 0) {
+        const populatedAddons = await Addonmodel.find({ _id: { $in: item.addon } }).lean();
+        item.addon = populatedAddons;
+      }
+    }
+    
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get data ${error.message}` });
@@ -55,6 +65,14 @@ export const getFilteredItems = async (req, res) => {
     const { veg } = req.query;
     const filter = veg !== undefined ? { veg: veg === 'true' } : {};
     const itemsdata = await Itemmodel.find(filter).populate('variation').populate('category').lean();
+    
+    // Manually populate addons
+    for (let item of itemsdata) {
+      if (item.addon && item.addon.length > 0) {
+        const populatedAddons = await Addonmodel.find({ _id: { $in: item.addon } }).lean();
+        item.addon = populatedAddons;
+      }
+    }
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get filtered data ${error.message}` });
@@ -76,6 +94,14 @@ export const getSortedItems = async (req, res) => {
     }
     
     const itemsdata = await Itemmodel.find(filter).sort(sortOption).populate('variation').populate('category').lean();
+    
+    // Manually populate addons
+    for (let item of itemsdata) {
+      if (item.addon && item.addon.length > 0) {
+        const populatedAddons = await Addonmodel.find({ _id: { $in: item.addon } }).lean();
+        item.addon = populatedAddons;
+      }
+    }
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get sorted data ${error.message}` });
