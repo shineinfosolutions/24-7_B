@@ -56,12 +56,12 @@ export const deleteVariation = async (req, res) => {
 export const updateVariation = async (req, res) => {
   try {
     const { id } = req.params; // variation ID from URL
-    const { name, price, stock } = req.body;
+    const { name, price, stock, available } = req.body;
 
     // Find and update variation
     const updatedVariation = await Variationmodel.findByIdAndUpdate(
       id,
-      { name, price, stock },
+      { name, price, stock, available },
       { new: true, runValidators: true }
     );
 
@@ -71,6 +71,33 @@ export const updateVariation = async (req, res) => {
 
     res.status(200).json({
       message: "Variation updated successfully",
+      variation: updatedVariation,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+      err: err.message,
+    });
+  }
+};
+
+export const updateVariationStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { available } = req.body;
+
+    const updatedVariation = await Variationmodel.findByIdAndUpdate(
+      id,
+      { available },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedVariation) {
+      return res.status(404).json({ message: "Variation not found" });
+    }
+
+    res.status(200).json({
+      message: "Variation status updated successfully",
       variation: updatedVariation,
     });
   } catch (err) {
