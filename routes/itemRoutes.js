@@ -15,5 +15,5 @@ itemRouter.get('/get', getItems);
 itemRouter.get('/filter', getFilteredItems);
 itemRouter.get('/sort', getSortedItems);
 itemRouter.put('/update/:id', upload.single('image'), updateItem);
-itemRouter.delete('/delete', deleteItem);
+itemRouter.delete('/delete/:id', deleteItem);
 export default itemRouter;   
