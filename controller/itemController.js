@@ -85,7 +85,7 @@ export const getSortedItems = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, longDescription, veg, category } = req.body;
+    const { name, price, description, longDescription, veg, category, available } = req.body;
     
     let imageUrl;
     if (req.file) {
@@ -104,7 +104,7 @@ export const updateItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
-    const updateData = { name, price, description, longDescription, veg, category };
+    const updateData = { name, price, description, longDescription, veg, category, available };
     if (imageUrl) updateData.image = imageUrl;
     
     const item = await Itemmodel.findByIdAndUpdate(id, updateData, { new: true });
@@ -114,6 +114,33 @@ export const updateItem = async (req, res) => {
     res.status(200).json({ message: "Item updated successfully", item });
   } catch (err) {
     res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
+
+export const updateItemStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { available } = req.body;
+
+    const item = await Itemmodel.findByIdAndUpdate(
+      id,
+      { available },
+      { new: true, runValidators: true }
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    res.status(200).json({
+      message: "Item status updated successfully",
+      item,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+      err: err.message,
+    });
   }
 };
 
