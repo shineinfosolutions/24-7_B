@@ -35,7 +35,7 @@ export const getVariations = async (req, res) => {
 export const deleteVariation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { itemId } = req.body;
+    const { itemId } = req.body || {};
     
     const variation = await Variationmodel.findByIdAndDelete(id);
     if (!variation) {
