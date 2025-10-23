@@ -6,6 +6,6 @@ const addressRouter = express.Router();
 addressRouter.post('/add', addAddress);
 addressRouter.post('/get', getAddresses);
 addressRouter.put('/update', updateAddress);
-addressRouter.delete('/delete', deleteAddress);
+addressRouter.delete('/delete/:id', deleteAddress);
 
 export default addressRouter;

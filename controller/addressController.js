@@ -84,13 +84,16 @@ export const updateAddress = async (req, res) => {
 
 export const deleteAddress = async (req, res) => {
   try {
-    const { userId, addressId } = req.body;
+    const { id } = req.params;
+    const { userId } = req.body;
     
-    // Remove address from user's addresses array
-    await userModel.findByIdAndUpdate(userId, { $pull: { addresses: addressId } });
+    // Remove address from user's addresses array if userId provided
+    if (userId) {
+      await userModel.findByIdAndUpdate(userId, { $pull: { addresses: id } });
+    }
     
     // Delete the address
-    const address = await addressModel.findByIdAndDelete(addressId);
+    const address = await addressModel.findByIdAndDelete(id);
     if (!address) {
       return res.status(404).json({ message: "Address not found" });
     }
