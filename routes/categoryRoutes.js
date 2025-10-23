@@ -13,6 +13,6 @@ categoryRouter.post('/add', upload.single('image'), (req, res, next) => {
 });
 categoryRouter.get('/get', getCategories);
 categoryRouter.put('/update/:id', upload.single('image'), updateCategory);
-categoryRouter.delete('/delete', deleteCategory);
+categoryRouter.delete('/delete/:id', deleteCategory);
 
 export default categoryRouter;
