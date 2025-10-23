@@ -14,7 +14,11 @@ const variationSchema = new mongoose.Schema({
     stock: {
         type: Number,
         required: true
-    }
+    },
+    available: {
+        type: Boolean,
+        default: true
+    }   
 
 })
 
