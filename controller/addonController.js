@@ -56,9 +56,6 @@ export const updateAddon = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, price, description, category, veg, available } = req.body;
-    
-    console.log('Updating addon:', id);
-    console.log('Update data:', { name, price, description, category, veg, available });
 
     const updatedAddon = await Addonmodel.findByIdAndUpdate(
       id,
