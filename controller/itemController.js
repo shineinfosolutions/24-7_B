@@ -119,14 +119,14 @@ export const updateItem = async (req, res) => {
 
 export const deleteItem = async (req, res) => {
   try {
-    const { itemId } = req.body;
+    const { id } = req.params;
     
     // Input validation
-    if (!itemId) {
+    if (!id) {
       return res.status(400).json({ message: "Item ID is required" });
     }
     
-    const item = await Itemmodel.findByIdAndDelete(itemId);
+    const item = await Itemmodel.findByIdAndDelete(id);
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
     }
