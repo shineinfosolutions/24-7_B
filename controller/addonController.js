@@ -54,10 +54,12 @@ export const deleteAddon = async (req, res) => {
 
 export const updateAddon = async (req, res) => {
   try {
-    const { id } = req.params; // Addon ID from URL
+    const { id } = req.params;
     const { name, price, description, category, veg, available } = req.body;
+    
+    console.log('Updating addon:', id);
+    console.log('Update data:', { name, price, description, category, veg, available });
 
-    // Find and update the addon
     const updatedAddon = await Addonmodel.findByIdAndUpdate(
       id,
       { name, price, description, category, veg, available },
@@ -68,11 +70,13 @@ export const updateAddon = async (req, res) => {
       return res.status(404).json({ message: "Addon not found" });
     }
 
+    console.log('Updated addon:', updatedAddon);
     res.status(200).json({
       message: "Addon updated successfully",
       addon: updatedAddon,
     });
   } catch (err) {
+    console.error('Update addon error:', err);
     res.status(500).json({
       message: "Server error",
       err: err.message,
