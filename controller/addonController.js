@@ -34,16 +34,17 @@ export const getAddons = async (req, res) => {
 
 export const deleteAddon = async (req, res) => {
   try {
-    const { addonId, itemId } = req.body;
+    const { id } = req.params;
+    const { itemId } = req.body;
     
-    const addon = await Addonmodel.findByIdAndDelete(addonId);
+    const addon = await Addonmodel.findByIdAndDelete(id);
     if (!addon) {
       return res.status(404).json({ message: "Addon not found" });
     }
     
     // Remove addon from item if itemId provided
     if (itemId) {
-      await Itemmodel.findByIdAndUpdate(itemId, { $pull: { addon: addonId } });
+      await Itemmodel.findByIdAndUpdate(itemId, { $pull: { addon: id } });
     }
     
     res.status(200).json({ message: "Addon deleted successfully", addon });
