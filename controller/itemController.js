@@ -104,7 +104,17 @@ export const updateItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
-    const updateData = { name, price, description, longDescription, veg, category, available };
+    const updateData = { 
+      name, 
+      price, 
+      description, 
+      longDescription, 
+      veg, 
+      category, 
+      available,
+      variation: req.body.variation || [],
+      addon: req.body.addon || []
+    };
     if (imageUrl) updateData.image = imageUrl;
     
     const item = await Itemmodel.findByIdAndUpdate(id, updateData, { new: true });
