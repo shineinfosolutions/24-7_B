@@ -56,7 +56,7 @@ export const deleteVariation = async (req, res) => {
 export const updateVariation = async (req, res) => {
   try {
     const { id } = req.params; // variation ID from URL
-    const { name, price, stock, available } = req.body;
+    const { name, price, stock, available, itemId } = req.body;
 
     // Find and update variation
     const updatedVariation = await Variationmodel.findByIdAndUpdate(
@@ -67,6 +67,15 @@ export const updateVariation = async (req, res) => {
 
     if (!updatedVariation) {
       return res.status(404).json({ message: "Variation not found" });
+    }
+
+    // Handle item association if itemId is provided
+    if (itemId) {
+      // Add variation to the specified item (without removing from others)
+      const item = await Itemmodel.findById(itemId);
+      if (item) {
+        await Itemmodel.findByIdAndUpdate(itemId, { $addToSet: { variation: id } });
+      }
     }
 
     res.status(200).json({

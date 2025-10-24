@@ -56,7 +56,7 @@ export const deleteAddon = async (req, res) => {
 export const updateAddon = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, category, veg, available } = req.body;
+    const { name, price, description, category, veg, available, itemId } = req.body;
 
     const updatedAddon = await Addonmodel.findByIdAndUpdate(
       id,
@@ -66,6 +66,15 @@ export const updateAddon = async (req, res) => {
 
     if (!updatedAddon) {
       return res.status(404).json({ message: "Addon not found" });
+    }
+
+    // Handle item association if itemId is provided
+    if (itemId) {
+      // Add addon to the specified item (without removing from others)
+      const item = await Itemmodel.findById(itemId);
+      if (item) {
+        await Itemmodel.findByIdAndUpdate(itemId, { $addToSet: { addon: id } });
+      }
     }
 
     console.log('Updated addon:', updatedAddon);
