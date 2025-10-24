@@ -88,8 +88,8 @@ export const updateStatus = async (req, res) => {
       return res.status(400).json({ message: "newStatus is required" });
     }
     
-    if (![1, 2, 3, 4, 5, 6].includes(newStatus)) {
-      return res.status(400).json({ message: "Invalid status. Must be 1-6" });
+    if (![1, 2, 3, 4, 5, 6, 7].includes(newStatus)) {
+      return res.status(400).json({ message: "Invalid status. Must be 1-7" });
     }
     
     const order = await orderModel.findById(orderId);
@@ -104,7 +104,8 @@ export const updateStatus = async (req, res) => {
       3: 'preparing', 
       4: 'prepared',
       5: 'out_for_delivery',
-      6: 'delivered'
+      6: 'delivered',
+      7: 'cancelled'
     };
     
     if (statusMap[newStatus]) {
@@ -136,7 +137,7 @@ export const bulkUpdateStatus = async (req, res) => {
       return res.status(400).json({ message: "orderIds array is required" });
     }
     
-    if (!newStatus || ![1, 2, 3, 4, 5, 6].includes(newStatus)) {
+    if (!newStatus || ![1, 2, 3, 4, 5, 6, 7].includes(newStatus)) {
       return res.status(400).json({ message: "Valid newStatus is required" });
     }
     
@@ -146,7 +147,8 @@ export const bulkUpdateStatus = async (req, res) => {
       3: 'preparing',
       4: 'prepared', 
       5: 'out_for_delivery',
-      6: 'delivered'
+      6: 'delivered',
+      7: 'cancelled'
     };
     
     const updateData = { 
@@ -188,7 +190,8 @@ export const getOrderStatus = async (req, res) => {
       3: 'PREPARING',
       4: 'PREPARED',
       5: 'OUT_FOR_DELIVERY', 
-      6: 'DELIVERED'
+      6: 'DELIVERED',
+      7: 'CANCELLED'
     };
     
     res.status(200).json({
@@ -207,8 +210,8 @@ export const getOrdersByStatus = async (req, res) => {
     const { status } = req.params;
     const statusNum = parseInt(status);
     
-    if (![1, 2, 3, 4, 5, 6].includes(statusNum)) {
-      return res.status(400).json({ message: "Invalid status. Must be 1-6" });
+    if (![1, 2, 3, 4, 5, 6, 7].includes(statusNum)) {
+      return res.status(400).json({ message: "Invalid status. Must be 1-7" });
     }
     
     const orders = await orderModel.find({ order_status: statusNum })
@@ -222,7 +225,8 @@ export const getOrdersByStatus = async (req, res) => {
       3: 'PREPARING',
       4: 'PREPARED',
       5: 'OUT_FOR_DELIVERY',
-      6: 'DELIVERED'
+      6: 'DELIVERED',
+      7: 'CANCELLED'
     };
     
     res.status(200).json({
@@ -340,7 +344,8 @@ export const getOrderWithTimestamps = async (req, res) => {
       3: 'ORDER PREPARING',
       4: 'ORDER PREPARED',
       5: 'OUT FOR DELIVERY',
-      6: 'ORDER DELIVERED'
+      6: 'ORDER DELIVERED',
+      7: 'ORDER CANCELLED'
     };
     
     const response = {
@@ -352,7 +357,8 @@ export const getOrderWithTimestamps = async (req, res) => {
         preparing: order.status_timestamps.preparing,
         prepared: order.status_timestamps.prepared,
         out_for_delivery: order.status_timestamps.out_for_delivery,
-        delivered: order.status_timestamps.delivered
+        delivered: order.status_timestamps.delivered,
+        cancelled: order.status_timestamps.cancelled
       }
     };
     
