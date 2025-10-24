@@ -4,6 +4,9 @@ import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
   try {
+    if (!req.body) {
+      return res.status(400).json({ message: "No data received" });
+    }
     const { name, price, description, longDescription, veg, category, variation, addon } = req.body;
     
     // Input validation
@@ -95,6 +98,9 @@ export const getSortedItems = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!req.body) {
+      return res.status(400).json({ message: "No data received" });
+    }
     const { name, price, description, longDescription, veg, category, available, variation, addon } = req.body;
     
     let imageUrl;
