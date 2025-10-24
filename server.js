@@ -34,7 +34,11 @@ const io = new Server(server, {
       "https://zomato-admin-seven.vercel.app",
     ],
     methods: ["GET", "POST"]
-  }
+  },
+  transports: ['websocket', 'polling'],
+  allowEIO3: true,
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
 // Make io available globally
