@@ -13,6 +13,7 @@ import addressRouter from "./routes/addressRoutes.js";
 import variationRouter from "./routes/variationRoutes.js";
 import searchRouter from "./routes/searchRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
+import filterRouter from "./routes/filterRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -52,5 +53,6 @@ app.use("/api/address", addressRouter);
 app.use("/api/variation", variationRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/cart", cartRouter);
+app.use("/api/filter", filterRouter);
 
 app.listen(port, () => console.log(`Server started on PORT: ${port}`));
