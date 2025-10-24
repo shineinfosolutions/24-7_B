@@ -85,7 +85,7 @@ export const updateAddress = async (req, res) => {
 export const deleteAddress = async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId } = req.body;
+    const { userId } = req.body || {};
     
     // Remove address from user's addresses array if userId provided
     if (userId) {

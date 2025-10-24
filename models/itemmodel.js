@@ -11,6 +11,7 @@ const itemSchema = new mongoose.Schema({
     veg:{type:Boolean},
     rating:{type:Number},
     deliveryTime:{type:Number, default: 30},
+    available: {type:Boolean, default: true},
     category: {type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true},
     variation: [{ type: mongoose.Schema.Types.ObjectId, ref:'variations'}],
     addon: [{ type: mongoose.Schema.Types.ObjectId, ref:'addon'}]
