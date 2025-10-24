@@ -5,34 +5,27 @@ import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
   try {
-    const { name, price, description, longDescription, veg, category } = req.body;
+    const { name, price, description, longDescription, veg, category, image } = req.body;
     
-    // Input validation
     if (!name || !price || !category) {
       return res.status(400).json({ message: "Name, price, and category are required" });
     }
     
-    // Validate category exists
     const categoryExists = await categoryModel.findById(category);
     if (!categoryExists) {
       return res.status(400).json({ message: "Invalid category ID" });
     }
     
     let imageUrl = null;
-    if (req.file) {
-      const uploadPromise = new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: 'menu-items' },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
-      });
-      
-      const uploadResult = await uploadPromise;
-      imageUrl = uploadResult.secure_url;
+    if (image) {
+      try {
+        const uploadResult = await cloudinary.uploader.upload(image, {
+          folder: 'menu-items'
+        });
+        imageUrl = uploadResult.secure_url;
+      } catch (uploadError) {
+        return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+      }
     }
     
     const item = await Itemmodel.create({ name, price, description, longDescription, image: imageUrl, veg, category });
@@ -111,24 +104,9 @@ export const getSortedItems = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, longDescription, veg, category, available } = req.body;
+    const { name, price, description, longDescription, veg, category, available, image } = req.body;
     
-    let imageUrl;
-    if (req.file) {
-      const uploadPromise = new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: 'menu-items' },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
-      });
-      
-      const uploadResult = await uploadPromise;
-      imageUrl = uploadResult.secure_url;
-    }
+    console.log('Image received:', image ? 'Yes' : 'No');
     
     const updateData = { 
       name, 
@@ -141,7 +119,19 @@ export const updateItem = async (req, res) => {
       variation: req.body.variation || [],
       addon: req.body.addon || []
     };
-    if (imageUrl) updateData.image = imageUrl;
+    
+    if (image) {
+      try {
+        const uploadResult = await cloudinary.uploader.upload(image, {
+          folder: 'menu-items'
+        });
+        updateData.image = uploadResult.secure_url;
+        console.log('Image uploaded:', uploadResult.secure_url);
+      } catch (uploadError) {
+        console.error('Upload error:', uploadError);
+        return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
+      }
+    }
     
     const item = await Itemmodel.findByIdAndUpdate(id, updateData, { new: true });
     if (!item) {
