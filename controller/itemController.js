@@ -1,31 +1,37 @@
 import Itemmodel from "../models/itemmodel.js";
 import categoryModel from "../models/categorymodel.js";
-import Addonmodel from "../models/addonmodel.js";
 import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
   try {
-    const { name, price, description, longDescription, veg, category, image } = req.body;
+    const { name, price, description, longDescription, veg, category } = req.body;
     
+    // Input validation
     if (!name || !price || !category) {
       return res.status(400).json({ message: "Name, price, and category are required" });
     }
     
+    // Validate category exists
     const categoryExists = await categoryModel.findById(category);
     if (!categoryExists) {
       return res.status(400).json({ message: "Invalid category ID" });
     }
     
     let imageUrl = null;
-    if (image) {
-      try {
-        const uploadResult = await cloudinary.uploader.upload(image, {
-          folder: 'menu-items'
-        });
-        imageUrl = uploadResult.secure_url;
-      } catch (uploadError) {
-        return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
-      }
+    if (req.file) {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'menu-items' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      
+      const uploadResult = await uploadPromise;
+      imageUrl = uploadResult.secure_url;
     }
     
     const item = await Itemmodel.create({ name, price, description, longDescription, image: imageUrl, veg, category });
@@ -37,16 +43,7 @@ export const addItem = async (req, res) => {
 
 export const getItems = async (req, res) => {
   try {
-    const itemsdata = await Itemmodel.find().populate('variation').populate('category').lean();
-    
-    // Manually populate addons
-    for (let item of itemsdata) {
-      if (item.addon && item.addon.length > 0) {
-        const populatedAddons = await Addonmodel.find({ _id: { $in: item.addon } }).lean();
-        item.addon = populatedAddons;
-      }
-    }
-    
+    const itemsdata = await Itemmodel.find().populate('variation').populate('addon').populate('category').lean();
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get data ${error.message}` });
@@ -57,15 +54,7 @@ export const getFilteredItems = async (req, res) => {
   try {
     const { veg } = req.query;
     const filter = veg !== undefined ? { veg: veg === 'true' } : {};
-    const itemsdata = await Itemmodel.find(filter).populate('variation').populate('category').lean();
-    
-    // Manually populate addons
-    for (let item of itemsdata) {
-      if (item.addon && item.addon.length > 0) {
-        const populatedAddons = await Addonmodel.find({ _id: { $in: item.addon } }).lean();
-        item.addon = populatedAddons;
-      }
-    }
+    const itemsdata = await Itemmodel.find(filter).populate('variation').populate('addon').populate('category').lean();
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get filtered data ${error.message}` });
@@ -86,15 +75,7 @@ export const getSortedItems = async (req, res) => {
       default: sortOption = { rating: -1 };
     }
     
-    const itemsdata = await Itemmodel.find(filter).sort(sortOption).populate('variation').populate('category').lean();
-    
-    // Manually populate addons
-    for (let item of itemsdata) {
-      if (item.addon && item.addon.length > 0) {
-        const populatedAddons = await Addonmodel.find({ _id: { $in: item.addon } }).lean();
-        item.addon = populatedAddons;
-      }
-    }
+    const itemsdata = await Itemmodel.find(filter).sort(sortOption).populate('variation').populate('addon').populate('category').lean();
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get sorted data ${error.message}` });
@@ -104,9 +85,24 @@ export const getSortedItems = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, longDescription, veg, category, available, image } = req.body;
+    const { name, price, description, longDescription, veg, category, available } = req.body;
     
-    console.log('Image received:', image ? 'Yes' : 'No');
+    let imageUrl;
+    if (req.file) {
+      const uploadPromise = new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'menu-items' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      
+      const uploadResult = await uploadPromise;
+      imageUrl = uploadResult.secure_url;
+    }
     
     const updateData = { 
       name, 
@@ -119,19 +115,7 @@ export const updateItem = async (req, res) => {
       variation: req.body.variation || [],
       addon: req.body.addon || []
     };
-    
-    if (image) {
-      try {
-        const uploadResult = await cloudinary.uploader.upload(image, {
-          folder: 'menu-items'
-        });
-        updateData.image = uploadResult.secure_url;
-        console.log('Image uploaded:', uploadResult.secure_url);
-      } catch (uploadError) {
-        console.error('Upload error:', uploadError);
-        return res.status(500).json({ message: "Image upload failed", error: uploadError.message });
-      }
-    }
+    if (imageUrl) updateData.image = imageUrl;
     
     const item = await Itemmodel.findByIdAndUpdate(id, updateData, { new: true });
     if (!item) {
