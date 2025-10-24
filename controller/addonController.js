@@ -35,7 +35,7 @@ export const getAddons = async (req, res) => {
 export const deleteAddon = async (req, res) => {
   try {
     const { id } = req.params;
-    const { itemId } = req.body;
+    const { itemId } = req.body || {};
     
     const addon = await Addonmodel.findByIdAndDelete(id);
     if (!addon) {

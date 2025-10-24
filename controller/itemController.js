@@ -43,7 +43,7 @@ export const addItem = async (req, res) => {
 
 export const getItems = async (req, res) => {
   try {
-    const itemsdata = await Itemmodel.find().populate('variation').populate('category').lean();
+    const itemsdata = await Itemmodel.find().populate('variation').populate('addon').populate('category').lean();
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get data ${error.message}` });
@@ -54,7 +54,7 @@ export const getFilteredItems = async (req, res) => {
   try {
     const { veg } = req.query;
     const filter = veg !== undefined ? { veg: veg === 'true' } : {};
-    const itemsdata = await Itemmodel.find(filter).populate('variation').populate('category').lean();
+    const itemsdata = await Itemmodel.find(filter).populate('variation').populate('addon').populate('category').lean();
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get filtered data ${error.message}` });
@@ -75,7 +75,7 @@ export const getSortedItems = async (req, res) => {
       default: sortOption = { rating: -1 };
     }
     
-    const itemsdata = await Itemmodel.find(filter).sort(sortOption).populate('variation').populate('category').lean();
+    const itemsdata = await Itemmodel.find(filter).sort(sortOption).populate('variation').populate('addon').populate('category').lean();
     return res.json({ success: true, itemsdata });
   } catch (error) {
     return res.json({ success: false, message: `Unable to get sorted data ${error.message}` });
@@ -85,7 +85,7 @@ export const getSortedItems = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, longDescription, veg, category } = req.body;
+    const { name, price, description, longDescription, veg, category, available } = req.body;
     
     let imageUrl;
     if (req.file) {
@@ -104,7 +104,17 @@ export const updateItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
-    const updateData = { name, price, description, longDescription, veg, category };
+    const updateData = { 
+      name, 
+      price, 
+      description, 
+      longDescription, 
+      veg, 
+      category, 
+      available,
+      variation: req.body.variation || [],
+      addon: req.body.addon || []
+    };
     if (imageUrl) updateData.image = imageUrl;
     
     const item = await Itemmodel.findByIdAndUpdate(id, updateData, { new: true });
@@ -114,6 +124,33 @@ export const updateItem = async (req, res) => {
     res.status(200).json({ message: "Item updated successfully", item });
   } catch (err) {
     res.status(500).json({ message: "Server error", err: err.message });
+  }
+};
+
+export const updateItemStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { available } = req.body;
+
+    const item = await Itemmodel.findByIdAndUpdate(
+      id,
+      { available },
+      { new: true, runValidators: true }
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Item not found" });
+    }
+
+    res.status(200).json({
+      message: "Item status updated successfully",
+      item,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+      err: err.message,
+    });
   }
 };
 
