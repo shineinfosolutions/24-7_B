@@ -4,17 +4,23 @@ import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
   try {
-    if (!req.body) {
-      return res.status(400).json({ message: "No data received" });
-    }
-    const { name, price, description, longDescription, veg, category, variation, addon } = req.body;
+    console.log('req.body:', req.body);
+    console.log('req.file:', req.file);
     
-    // Input validation
+    const body = req.body || {};
+    const name = body.name;
+    const price = body.price;
+    const description = body.description || '';
+    const longDescription = body.longDescription || '';
+    const veg = body.veg === 'true';
+    const category = body.category;
+    const variation = body.variation ? JSON.parse(body.variation) : [];
+    const addon = body.addon ? JSON.parse(body.addon) : [];
+    
     if (!name || !price || !category) {
       return res.status(400).json({ message: "Name, price, and category are required" });
     }
     
-    // Validate category exists
     const categoryExists = await categoryModel.findById(category);
     if (!categoryExists) {
       return res.status(400).json({ message: "Invalid category ID" });
@@ -43,10 +49,10 @@ export const addItem = async (req, res) => {
       description, 
       longDescription, 
       image: imageUrl, 
-      veg: veg === 'true', 
+      veg, 
       category,
-      variation: variation ? JSON.parse(variation) : [],
-      addon: addon ? JSON.parse(addon) : []
+      variation,
+      addon
     });
     res.status(200).json({ message: "Item added successfully", item });
   } catch (err) {
@@ -98,10 +104,17 @@ export const getSortedItems = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!req.body) {
-      return res.status(400).json({ message: "No data received" });
-    }
-    const { name, price, description, longDescription, veg, category, available, variation, addon } = req.body;
+    
+    const body = req.body || {};
+    const name = body.name;
+    const price = body.price;
+    const description = body.description || '';
+    const longDescription = body.longDescription || '';
+    const veg = body.veg === 'true';
+    const category = body.category;
+    const available = body.available;
+    const variation = body.variation ? JSON.parse(body.variation) : [];
+    const addon = body.addon ? JSON.parse(body.addon) : [];
     
     let imageUrl;
     if (req.file) {
@@ -125,11 +138,11 @@ export const updateItem = async (req, res) => {
       price, 
       description, 
       longDescription, 
-      veg: veg === 'true', 
+      veg, 
       category, 
       available,
-      variation: variation ? JSON.parse(variation) : [],
-      addon: addon ? JSON.parse(addon) : []
+      variation,
+      addon
     };
     if (imageUrl) updateData.image = imageUrl;
     
@@ -174,7 +187,6 @@ export const deleteItem = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Input validation
     if (!id) {
       return res.status(400).json({ message: "Item ID is required" });
     }
