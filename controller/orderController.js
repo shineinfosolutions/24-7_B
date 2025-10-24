@@ -82,13 +82,24 @@ export const createOrder = async (req, res) => {
 export const updateStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { newStatus } = req.body;
+    const { newStatus, reason } = req.body;
+    
     if (!newStatus) {
-      return res.status(400).json({ message: "newStatus is required in request body" });
+      return res.status(400).json({ message: "newStatus is required" });
+    }
+    
+    if (![1, 2, 3, 4, 5, 6].includes(newStatus)) {
+      return res.status(400).json({ message: "Invalid status. Must be 1-6" });
+    }
+    
+    const order = await orderModel.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
     }
     
     const updateData = { order_status: newStatus };
     const statusMap = {
+      1: 'pending',
       2: 'accepted',
       3: 'preparing', 
       4: 'prepared',
@@ -100,11 +111,127 @@ export const updateStatus = async (req, res) => {
       updateData[`status_timestamps.${statusMap[newStatus]}`] = new Date();
     }
     
-    await orderModel.findByIdAndUpdate(orderId, updateData);
-    res.status(200).json({ message: "Status updated successfully" });
+    if (reason) {
+      updateData.status_reason = reason;
+    }
+    
+    const updatedOrder = await orderModel.findByIdAndUpdate(orderId, updateData, { new: true });
+    
+    res.status(200).json({ 
+      message: "Status updated successfully", 
+      order: updatedOrder,
+      newStatus: statusMap[newStatus].toUpperCase()
+    });
   } catch (error) {
     console.error("Error updating status:", error);
     res.status(500).json({ message: "Failed to update status", error: error.message });
+  }
+};
+
+export const bulkUpdateStatus = async (req, res) => {
+  try {
+    const { orderIds, newStatus, reason } = req.body;
+    
+    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+      return res.status(400).json({ message: "orderIds array is required" });
+    }
+    
+    if (!newStatus || ![1, 2, 3, 4, 5, 6].includes(newStatus)) {
+      return res.status(400).json({ message: "Valid newStatus is required" });
+    }
+    
+    const statusMap = {
+      1: 'pending',
+      2: 'accepted',
+      3: 'preparing',
+      4: 'prepared', 
+      5: 'out_for_delivery',
+      6: 'delivered'
+    };
+    
+    const updateData = { 
+      order_status: newStatus,
+      [`status_timestamps.${statusMap[newStatus]}`]: new Date()
+    };
+    
+    if (reason) {
+      updateData.status_reason = reason;
+    }
+    
+    const result = await orderModel.updateMany(
+      { _id: { $in: orderIds } },
+      updateData
+    );
+    
+    res.status(200).json({
+      message: "Bulk status update completed",
+      updatedCount: result.modifiedCount,
+      status: statusMap[newStatus].toUpperCase()
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Bulk update failed", error: error.message });
+  }
+};
+
+export const getOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    const order = await orderModel.findById(orderId, 'order_status status_timestamps');
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    const statusNames = {
+      1: 'PENDING',
+      2: 'ACCEPTED',
+      3: 'PREPARING',
+      4: 'PREPARED',
+      5: 'OUT_FOR_DELIVERY', 
+      6: 'DELIVERED'
+    };
+    
+    res.status(200).json({
+      orderId,
+      currentStatus: order.order_status,
+      statusName: statusNames[order.order_status],
+      timestamps: order.status_timestamps
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get status", error: error.message });
+  }
+};
+
+export const getOrdersByStatus = async (req, res) => {
+  try {
+    const { status } = req.params;
+    const statusNum = parseInt(status);
+    
+    if (![1, 2, 3, 4, 5, 6].includes(statusNum)) {
+      return res.status(400).json({ message: "Invalid status. Must be 1-6" });
+    }
+    
+    const orders = await orderModel.find({ order_status: statusNum })
+      .populate('customer_id', 'name email phone')
+      .populate('address_id')
+      .sort({ createdAt: -1 });
+    
+    const statusNames = {
+      1: 'PENDING',
+      2: 'ACCEPTED', 
+      3: 'PREPARING',
+      4: 'PREPARED',
+      5: 'OUT_FOR_DELIVERY',
+      6: 'DELIVERED'
+    };
+    
+    res.status(200).json({
+      status: statusNames[statusNum],
+      count: orders.length,
+      orders
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get orders", error: error.message });
   }
 };
 
