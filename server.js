@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import 'dotenv/config';
+import "dotenv/config";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongodb.js";
 import userRouter from "./routes/userRoutes.js";
@@ -15,35 +15,41 @@ import searchRouter from "./routes/searchRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 
 const app = express();
-const port = process.env.PORT || 4000
+const port = process.env.PORT || 4000;
 
 connectDB();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173','http://zomato-frontend-blush.vercel.app', 'http://127.0.0.1:5500', 'https://zomato-frontend-pearl.vercel.app','https://zomato-admin-seven.vercel.app'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://zomato-frontend-blush.vercel.app",
+      "http://127.0.0.1:5500",
+      "https://zomato-frontend-pearl.vercel.app",
+      "https://zomato-admin-seven.vercel.app",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // API Endpoints
-app.get("/", (req, res) => { 
-    res.send("API is working fine");
-  });
-  
+app.get("/", (req, res) => {
+  res.send("API is working fine");
+});
 
-app.use('/api/user',userRouter)
-app.use('/api/admin', adminRouter)
-app.use('/api/category', categoryRouter)
-app.use('/api/item', itemRouter)
-app.use('/api/order', orderRouter)
-app.use('/api/addon', addonRouter)
-app.use('/api/address', addressRouter)
-app.use('/api/variation', variationRouter)
-app.use('/api/search', searchRouter)
-app.use('/api/cart', cartRouter)
+app.use("/api/user", userRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/item", itemRouter);
+app.use("/api/order", orderRouter);
+app.use("/api/addon", addonRouter);
+app.use("/api/address", addressRouter);
+app.use("/api/variation", variationRouter);
+app.use("/api/search", searchRouter);
+app.use("/api/cart", cartRouter);
 
-
-app.listen(port, ()=>console.log(`Server started on PORT: ${port}`));
+app.listen(port, () => console.log(`Server started on PORT: ${port}`));
