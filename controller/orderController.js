@@ -37,16 +37,6 @@ export const createOrder = async (req, res) => {
       { new: true }
     );
 
-    // Get populated order for WebSocket
-    const populatedOrder = await orderModel.findById(savedOrder._id)
-      .populate('customer_id')
-      .populate('address_id')
-      .populate('item_ids');
-
-    // Emit new order to admin
-    const io = req.app.get('io');
-    io.to('admin').emit('new-order', populatedOrder);
-
     // Auto-update order status
     setTimeout(async () => {
       await orderModel.findByIdAndUpdate(savedOrder._id, {
@@ -83,7 +73,7 @@ export const createOrder = async (req, res) => {
       });
     }, 40 * 60000);
 
-    res.status(201).json({ message: "Order placed", order: savedOrder, user: updateduser, orderId: savedOrder._id });
+    res.status(201).json({ message: "Order placed", order: savedOrder, user: updateduser });
   } catch (err) {
     res.status(500).json({ message: `${err}` });
   }
@@ -126,15 +116,7 @@ export const updateStatus = async (req, res) => {
       updateData.status_reason = reason;
     }
     
-    const updatedOrder = await orderModel.findByIdAndUpdate(orderId, updateData, { new: true })
-      .populate('customer_id')
-      .populate('address_id')
-      .populate('item_ids');
-    
-    // Emit status update to admin and user
-    const io = req.app.get('io');
-    io.to('admin').emit('order-status-updated', updatedOrder);
-    io.to(`user-${updatedOrder.customer_id._id}`).emit('order-status-updated', updatedOrder);
+    const updatedOrder = await orderModel.findByIdAndUpdate(orderId, updateData, { new: true });
     
     res.status(200).json({ 
       message: "Status updated successfully", 
