@@ -29,7 +29,7 @@ app.use(
       "http://localhost:5173",
       "http://zomato-frontend-blush.vercel.app",
       "http://127.0.0.1:5500",
-      "https://zomato-frontend-pearl.vercel.app",
+      "https://zomato-frontend-xi.vercel.app",
       "https://zomato-admin-seven.vercel.app",
     ],
     credentials: true,
