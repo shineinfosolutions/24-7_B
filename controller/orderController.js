@@ -3,6 +3,7 @@ import userModel from "../models/usermodel.js";
 import "../models/usermodel.js"; // Ensure model is registered
 import addressModel from "../models/addressmodel.js";
 import Itemmodel from "../models/itemmodel.js";
+import { broadcastOrderUpdate } from "../routes/sseRoutes.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -73,6 +74,9 @@ export const createOrder = async (req, res) => {
       });
     }, 40 * 60000);
 
+    // Broadcast new order to admin via SSE
+    broadcastOrderUpdate(savedOrder);
+    
     res.status(201).json({ message: "Order placed", order: savedOrder, user: updateduser });
   } catch (err) {
     res.status(500).json({ message: `${err}` });
