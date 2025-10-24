@@ -4,7 +4,7 @@ import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
   try {
-    const { name, price, description, longDescription, veg, category } = req.body;
+    const { name, price, description, longDescription, veg, category, variation, addon } = req.body;
     
     // Input validation
     if (!name || !price || !category) {
@@ -34,7 +34,17 @@ export const addItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
-    const item = await Itemmodel.create({ name, price, description, longDescription, image: imageUrl, veg, category });
+    const item = await Itemmodel.create({ 
+      name, 
+      price, 
+      description, 
+      longDescription, 
+      image: imageUrl, 
+      veg: veg === 'true', 
+      category,
+      variation: variation ? JSON.parse(variation) : [],
+      addon: addon ? JSON.parse(addon) : []
+    });
     res.status(200).json({ message: "Item added successfully", item });
   } catch (err) {
     res.status(500).json({ message: "Server error", err: err.message });
@@ -85,7 +95,7 @@ export const getSortedItems = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, longDescription, veg, category, available } = req.body;
+    const { name, price, description, longDescription, veg, category, available, variation, addon } = req.body;
     
     let imageUrl;
     if (req.file) {
@@ -109,11 +119,11 @@ export const updateItem = async (req, res) => {
       price, 
       description, 
       longDescription, 
-      veg, 
+      veg: veg === 'true', 
       category, 
       available,
-      variation: req.body.variation || [],
-      addon: req.body.addon || []
+      variation: variation ? JSON.parse(variation) : [],
+      addon: addon ? JSON.parse(addon) : []
     };
     if (imageUrl) updateData.image = imageUrl;
     
