@@ -4,7 +4,7 @@ import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
   try {
-    const { name, price, description, longDescription, veg, category, quantity, rating } = req.body;
+    const { name, price, description, longDescription, veg, category } = req.body;
     
     // Input validation
     if (!name || !price || !category) {
@@ -34,36 +34,7 @@ export const addItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
-    let variations = [];
-    let addons = [];
-    
-    try {
-      variations = req.body.variation ? JSON.parse(req.body.variation) : [];
-    } catch (e) {
-      variations = [];
-    }
-    
-    try {
-      addons = req.body.addon ? JSON.parse(req.body.addon) : [];
-    } catch (e) {
-      addons = [];
-    }
-    
-    const itemData = {
-      name,
-      price,
-      description,
-      longDescription,
-      image: imageUrl,
-      veg,
-      category,
-      quantity,
-      rating,
-      variation: variations,
-      addon: addons
-    };
-    
-    const item = await Itemmodel.create(itemData);
+    const item = await Itemmodel.create({ name, price, description, longDescription, image: imageUrl, veg, category });
     res.status(200).json({ message: "Item added successfully", item });
   } catch (err) {
     res.status(500).json({ message: "Server error", err: err.message });
@@ -133,21 +104,6 @@ export const updateItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
-    let variations = [];
-    let addons = [];
-    
-    try {
-      variations = req.body.variation ? JSON.parse(req.body.variation) : [];
-    } catch (e) {
-      variations = [];
-    }
-    
-    try {
-      addons = req.body.addon ? JSON.parse(req.body.addon) : [];
-    } catch (e) {
-      addons = [];
-    }
-    
     const updateData = { 
       name, 
       price, 
@@ -156,8 +112,8 @@ export const updateItem = async (req, res) => {
       veg, 
       category, 
       available,
-      variation: variations,
-      addon: addons
+      variation: req.body.variation || [],
+      addon: req.body.addon || []
     };
     if (imageUrl) updateData.image = imageUrl;
     
@@ -216,3 +172,4 @@ export const deleteItem = async (req, res) => {
     res.status(500).json({ message: "Server error", err: err.message });
   }
 };
+ddsf
