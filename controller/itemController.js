@@ -34,6 +34,21 @@ export const addItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
+    let variations = [];
+    let addons = [];
+    
+    try {
+      variations = req.body.variation ? JSON.parse(req.body.variation) : [];
+    } catch (e) {
+      variations = [];
+    }
+    
+    try {
+      addons = req.body.addon ? JSON.parse(req.body.addon) : [];
+    } catch (e) {
+      addons = [];
+    }
+    
     const itemData = {
       name,
       price,
@@ -44,8 +59,8 @@ export const addItem = async (req, res) => {
       category,
       quantity,
       rating,
-      variation: req.body.variation ? JSON.parse(req.body.variation) : [],
-      addon: req.body.addon ? JSON.parse(req.body.addon) : []
+      variation: variations,
+      addon: addons
     };
     
     const item = await Itemmodel.create(itemData);
@@ -118,6 +133,21 @@ export const updateItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
+    let variations = [];
+    let addons = [];
+    
+    try {
+      variations = req.body.variation ? JSON.parse(req.body.variation) : [];
+    } catch (e) {
+      variations = [];
+    }
+    
+    try {
+      addons = req.body.addon ? JSON.parse(req.body.addon) : [];
+    } catch (e) {
+      addons = [];
+    }
+    
     const updateData = { 
       name, 
       price, 
@@ -126,8 +156,8 @@ export const updateItem = async (req, res) => {
       veg, 
       category, 
       available,
-      variation: req.body.variation ? JSON.parse(req.body.variation) : [],
-      addon: req.body.addon ? JSON.parse(req.body.addon) : []
+      variation: variations,
+      addon: addons
     };
     if (imageUrl) updateData.image = imageUrl;
     
