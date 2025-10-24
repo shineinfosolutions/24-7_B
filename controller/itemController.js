@@ -4,7 +4,7 @@ import cloudinary from "../config/cloudinary.js";
 
 export const addItem = async (req, res) => {
   try {
-    const { name, price, description, longDescription, veg, category } = req.body;
+    const { name, price, description, longDescription, veg, category, quantity, rating } = req.body;
     
     // Input validation
     if (!name || !price || !category) {
@@ -34,7 +34,21 @@ export const addItem = async (req, res) => {
       imageUrl = uploadResult.secure_url;
     }
     
-    const item = await Itemmodel.create({ name, price, description, longDescription, image: imageUrl, veg, category });
+    const itemData = {
+      name,
+      price,
+      description,
+      longDescription,
+      image: imageUrl,
+      veg,
+      category,
+      quantity,
+      rating,
+      variation: req.body.variation ? JSON.parse(req.body.variation) : [],
+      addon: req.body.addon ? JSON.parse(req.body.addon) : []
+    };
+    
+    const item = await Itemmodel.create(itemData);
     res.status(200).json({ message: "Item added successfully", item });
   } catch (err) {
     res.status(500).json({ message: "Server error", err: err.message });
@@ -112,8 +126,8 @@ export const updateItem = async (req, res) => {
       veg, 
       category, 
       available,
-      variation: req.body.variation || [],
-      addon: req.body.addon || []
+      variation: req.body.variation ? JSON.parse(req.body.variation) : [],
+      addon: req.body.addon ? JSON.parse(req.body.addon) : []
     };
     if (imageUrl) updateData.image = imageUrl;
     
