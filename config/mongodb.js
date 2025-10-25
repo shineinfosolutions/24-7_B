@@ -6,14 +6,19 @@ dotenv.config();
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 10000,
-      connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 30000,
+      connectTimeoutMS: 30000,
+      socketTimeoutMS: 30000,
+      maxPoolSize: 10,
+      retryWrites: true,
+      w: 'majority'
     });
 
     console.log(`✅ Database Connected: ${mongoose.connection.name}`);
   } catch (error) {
     console.error(`❌ Error: ${error.message}`);
-    process.exit(1);
+    console.log('Retrying connection in 5 seconds...');
+    setTimeout(() => connectDB(), 5000);
   }
 };
 
