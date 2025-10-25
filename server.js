@@ -16,6 +16,7 @@ import variationRouter from "./routes/variationRoutes.js";
 import searchRouter from "./routes/searchRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import filterRouter from "./routes/filterRoutes.js";
+import realtimeRouter from "./routes/realtimeRoutes.js";
 
 const app = express();
 const server = createServer(app);
@@ -35,7 +36,9 @@ const io = new Server(server, {
       "https://zomato-admin-seven.vercel.app",
     ],
     methods: ["GET", "POST"]
-  }
+  },
+  transports: ['polling'],
+  allowEIO3: true
 });
 
 setSocketIO(io);
@@ -77,6 +80,7 @@ app.use("/api/variation", variationRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/filter", filterRouter);
+app.use("/api/realtime", realtimeRouter);
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
