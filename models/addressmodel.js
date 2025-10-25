@@ -20,6 +20,6 @@ const addressSchema = new mongoose.Schema({
   isDefault: { type: Boolean, default: false }, // Default delivery address
 }, { timestamps: true });
 
-const addressModel = mongoose.models.UserAddress || mongoose.model('UserAddress', addressSchema);
+const addressModel = mongoose.model('UserAddress', addressSchema);
 export default addressModel;    
 

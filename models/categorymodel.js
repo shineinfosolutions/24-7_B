@@ -7,7 +7,6 @@ const categorySchema = new mongoose.Schema({
     image: {type:String}
 })
 
-const categoryModel = mongoose.models.Category || 
-    mongoose.model("Category", categorySchema);
+const categoryModel = mongoose.model("Category", categorySchema);
 
 export default categoryModel;
