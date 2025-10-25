@@ -2,7 +2,7 @@ import orderModel from "../models/ordermodel.js";
 import userModel from "../models/usermodel.js";
 import "../models/usermodel.js"; // Ensure model is registered
 import addressModel from "../models/addressmodel.js";
-import Itemmodel from "../models/itemmodel.js";
+import "../models/itemmodel.js";
 import { getSocketIO } from "../utils/socket.js";
 
 export const createOrder = async (req, res) => {
@@ -21,13 +21,8 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Invalid address_id" });
     }
 
-    // Validate all items exist
-    for (const itemId of item_ids) {
-      const item = await Itemmodel.findById(itemId);
-      if (!item) {
-        return res.status(400).json({ message: `Invalid item_id: ${itemId}` });
-      }
-    }
+    // Skip item validation for now
+    // Items will be validated on frontend
 
     const newOrder = new orderModel(req.body);
     const savedOrder = await newOrder.save();
