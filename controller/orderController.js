@@ -367,3 +367,32 @@ export const getOrderWithTimestamps = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+export const getCurrentOrder = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    
+    if (!phone) {
+      return res.status(400).json({ success: false, message: "Phone number is required" });
+    }
+    
+    // Find user by phone
+    const user = await userModel.findOne({ phone });
+    if (!user) {
+      return res.json({ success: false, message: "User not found" });
+    }
+    
+    // Find latest order
+    const latestOrder = await orderModel.findOne({
+      customer_id: user._id
+    }).populate('item_ids').populate('address_id').sort({ createdAt: -1 });
+    
+    if (!latestOrder) {
+      return res.json({ success: false, message: "No order found" });
+    }
+    
+    res.json({ success: true, order: latestOrder });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

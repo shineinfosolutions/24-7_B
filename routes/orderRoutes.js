@@ -1,5 +1,5 @@
 import express from "express";
-import { createOrder, updateStatus, getOrders, getAllOrders, autoUpdateOrder, getOrderById, getOrderWithTimestamps, bulkUpdateStatus, getOrderStatus, getOrdersByStatus } from "../controller/orderController.js";
+import { createOrder, updateStatus, getOrders, getAllOrders, autoUpdateOrder, getOrderById, getOrderWithTimestamps, bulkUpdateStatus, getOrderStatus, getOrdersByStatus, getCurrentOrder } from "../controller/orderController.js";
 
 const orderRouter = express.Router();
 
@@ -13,5 +13,6 @@ orderRouter.get('/getall', getAllOrders);
 orderRouter.get('/get/:id', getOrderById);
 orderRouter.post('/auto-update/:orderId', autoUpdateOrder);
 orderRouter.get('/timeline/:orderId', getOrderWithTimestamps);
+orderRouter.post('/current', getCurrentOrder);
 
 export default orderRouter;
