@@ -13,6 +13,6 @@ const wishSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
-const wishmodel = mongoose.model('wishlist', wishSchema);
+const wishmodel = mongoose.models.wishlist || mongoose.model('wishlist', wishSchema);
 
 export default wishmodel;

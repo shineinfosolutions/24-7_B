@@ -2,8 +2,6 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
-import { createServer } from "http";
-import { Server } from "socket.io";
 import connectDB from "./config/mongodb.js";
 import userRouter from "./routes/userRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
@@ -16,32 +14,9 @@ import variationRouter from "./routes/variationRoutes.js";
 import searchRouter from "./routes/searchRoutes.js";
 import cartRouter from "./routes/cartRoutes.js";
 import filterRouter from "./routes/filterRoutes.js";
-import realtimeRouter from "./routes/realtimeRoutes.js";
 
 const app = express();
-const server = createServer(app);
 const port = process.env.PORT || 4000;
-
-import { setSocketIO } from "./utils/socket.js";
-
-const io = new Server(server, {
-  cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://zomato-frontend-blush.vercel.app",
-      "http://127.0.0.1:5500",
-      "https://zomato-frontend-xi.vercel.app",
-      "https://zomato-admin-seven.vercel.app",
-    ],
-    methods: ["GET", "POST"]
-  },
-  transports: ['polling'],
-  allowEIO3: true
-});
-
-setSocketIO(io);
 
 connectDB();
 app.use(express.json({ limit: '50mb' }));
@@ -52,7 +27,6 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://localhost:5173",
-      "http://localhost:5174",
       "http://zomato-frontend-blush.vercel.app",
       "http://127.0.0.1:5500",
       "https://zomato-frontend-xi.vercel.app",
@@ -80,19 +54,5 @@ app.use("/api/variation", variationRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/filter", filterRouter);
-app.use("/api/realtime", realtimeRouter);
 
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  
-  socket.on('join-admin', () => {
-    socket.join('admin');
-    console.log('Admin joined:', socket.id);
-  });
-  
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-});
-
-server.listen(port, () => console.log(`Server started on PORT: ${port}`));
+app.listen(port, () => console.log(`Server started on PORT: ${port}`));

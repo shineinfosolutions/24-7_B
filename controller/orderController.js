@@ -2,8 +2,7 @@ import orderModel from "../models/ordermodel.js";
 import userModel from "../models/usermodel.js";
 import "../models/usermodel.js"; // Ensure model is registered
 import addressModel from "../models/addressmodel.js";
-import "../models/itemmodel.js";
-import { getSocketIO } from "../utils/socket.js";
+import Itemmodel from "../models/itemmodel.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -21,8 +20,13 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Invalid address_id" });
     }
 
-    // Skip item validation for now
-    // Items will be validated on frontend
+    // Validate all items exist
+    for (const itemId of item_ids) {
+      const item = await Itemmodel.findById(itemId);
+      if (!item) {
+        return res.status(400).json({ message: `Invalid item_id: ${itemId}` });
+      }
+    }
 
     const newOrder = new orderModel(req.body);
     const savedOrder = await newOrder.save();
@@ -33,37 +37,12 @@ export const createOrder = async (req, res) => {
       { new: true }
     );
 
-    // Populate order details for real-time notification
-    const populatedOrder = await orderModel.findById(savedOrder._id)
-      .populate('customer_id', 'name email phone')
-      .populate('address_id')
-      .populate('item_ids');
-
-    // Emit new order to admin
-    const io = getSocketIO();
-    if (io) {
-      io.to('admin').emit('new-order', {
-        order: populatedOrder,
-        message: `New order received from ${populatedOrder.customer_id.name}`
-      });
-    }
-
     // Auto-update order status
     setTimeout(async () => {
-      const updatedOrder = await orderModel.findByIdAndUpdate(savedOrder._id, {
+      await orderModel.findByIdAndUpdate(savedOrder._id, {
         order_status: 2,
         'status_timestamps.accepted': new Date()
-      }, { new: true }).populate('customer_id', 'name');
-      
-      const io = getSocketIO();
-      if (io) {
-        io.to('admin').emit('order-status-update', {
-          orderId: savedOrder._id,
-          status: 2,
-          statusName: 'ACCEPTED',
-          customerName: updatedOrder.customer_id.name
-        });
-      }
+      });
     }, 2 * 60000);
     
     setTimeout(async () => {
