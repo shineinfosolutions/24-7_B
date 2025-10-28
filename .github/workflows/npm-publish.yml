@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           # Use a PAT so private submodules (if any) work and to avoid default token limitations
-          token: ${{ secrets.PAT_TOKEN }}
+          token: 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
           fetch-depth: 0
 
       - name: Show workspace path
