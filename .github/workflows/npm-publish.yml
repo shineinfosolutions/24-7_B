@@ -5,85 +5,48 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-# Prevent overlapping deploys
-concurrency:
-  group: deploy-ec2-247B
-  cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: self-hosted
-    timeout-minutes: 30
 
     steps:
-      # --- CLONE (this is the "git clone" in Actions) ---
-      - name: Checkout repository
+      # 1️⃣ Pull latest code
+      - name: Checkout latest code
         uses: actions/checkout@v4
         with:
-          # Use a PAT so private submodules (if any) work and to avoid default token limitations
-          token: "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"
-          fetch-depth: 0
+          fetch-depth: 1   # just latest commit
+          token: ${{ secrets.GITHUB_TOKEN }}  # built-in token, no PAT needed
 
-      - name: Show workspace path
-        run: |
-          echo "Workspace: ${{ github.workspace }}"
-          ls -la ${{ github.workspace }}
-
-      # --- Node setup ---
-      - name: Set up Node.js
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: npm ci || npm install
 
-      - name: Build
+      # 4️⃣ Build (skip if no build script)
+      - name: Build project
         run: |
-          if [ -f package.json ] && jq -er '.scripts.build' package.json > /dev/null 2>&1; then
+          if [ -f package.json ] && grep -q "\"build\"" package.json; then
             npm run build
           else
-            echo "No build script found, skipping."
+            echo "No build script found, skipping build."
           fi
 
-      # --- PM2 install & (re)start the app ---
-      - name: Ensure PM2 is installed
-        run: |
-          if ! command -v pm2 >/dev/null 2>&1; then
-            npm i -g pm2
-          fi
-          pm2 -v
-
-      # If you have an ecosystem.config.js, PM2 will use it; otherwise it will run `npm start`
-      - name: Start/Reload with PM2
+      # 5️⃣ Start / Reload app with PM2
+      - name: Start app with PM2
         run: |
           APP_NAME="247B"
-          cd "${{ github.workspace }}"
-
-          if [ -f ecosystem.config.js ]; then
-            # Zero-downtime reload if already running; otherwise start
-            pm2 startOrReload ecosystem.config.js --only "$APP_NAME" || pm2 start ecosystem.config.js --only "$APP_NAME"
-          else
-            # Start via npm start with a friendly name
-            if pm2 list | grep -q "$APP_NAME"; then
-              pm2 reload "$APP_NAME" --update-env
-            else
-              pm2 start npm --name "$APP_NAME" -- run start
-            fi
+          if ! command -v pm2 >/dev/null 2>&1; then
+            npm install -g pm2
           fi
-
-          # Make PM2 resurrect on reboot
-          pm2 startup systemd -u ec2-user --hp /home/ec2-user >/dev/null 2>&1 || true
+          if pm2 list | grep -q "$APP_NAME"; then
+            pm2 reload "$APP_NAME" --update-env
+          else
+            pm2 start npm --name "$APP_NAME" -- run start
+          fi
           pm2 save
           pm2 status
-
-      # (Optional) Health check
-      - name: Health check (optional)
-        run: |
-          echo "Add curl http://localhost:PORT/health if you have one"
