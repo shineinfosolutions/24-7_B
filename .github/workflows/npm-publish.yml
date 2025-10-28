@@ -1,0 +1,89 @@
+name: Deploy to EC2 (Self-hosted)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+# Prevent overlapping deploys
+concurrency:
+  group: deploy-ec2-247B
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    timeout-minutes: 30
+
+    steps:
+      # --- CLONE (this is the "git clone" in Actions) ---
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Use a PAT so private submodules (if any) work and to avoid default token limitations
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Show workspace path
+        run: |
+          echo "Workspace: ${{ github.workspace }}"
+          ls -la ${{ github.workspace }}
+
+      # --- Node setup ---
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Build
+        run: |
+          if [ -f package.json ] && jq -er '.scripts.build' package.json > /dev/null 2>&1; then
+            npm run build
+          else
+            echo "No build script found, skipping."
+          fi
+
+      # --- PM2 install & (re)start the app ---
+      - name: Ensure PM2 is installed
+        run: |
+          if ! command -v pm2 >/dev/null 2>&1; then
+            npm i -g pm2
+          fi
+          pm2 -v
+
+      # If you have an ecosystem.config.js, PM2 will use it; otherwise it will run `npm start`
+      - name: Start/Reload with PM2
+        run: |
+          APP_NAME="247B"
+          cd "${{ github.workspace }}"
+
+          if [ -f ecosystem.config.js ]; then
+            # Zero-downtime reload if already running; otherwise start
+            pm2 startOrReload ecosystem.config.js --only "$APP_NAME" || pm2 start ecosystem.config.js --only "$APP_NAME"
+          else
+            # Start via npm start with a friendly name
+            if pm2 list | grep -q "$APP_NAME"; then
+              pm2 reload "$APP_NAME" --update-env
+            else
+              pm2 start npm --name "$APP_NAME" -- run start
+            fi
+          fi
+
+          # Make PM2 resurrect on reboot
+          pm2 startup systemd -u ec2-user --hp /home/ec2-user >/dev/null 2>&1 || true
+          pm2 save
+          pm2 status
+
+      # (Optional) Health check
+      - name: Health check (optional)
+        run: |
+          echo "Add curl http://localhost:PORT/health if you have one"
