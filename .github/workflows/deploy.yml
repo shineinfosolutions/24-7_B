@@ -53,18 +53,18 @@ jobs:
           fi
 
       # 6️⃣ Start / Reload app with PM2 using npm run dev
-      - name: Start app with PM2 (npm run dev)
+      - name: Start app with PM2 (npm run start)
         run: |
-          APP_NAME="247B"
-          if pm2 list | grep -q "$APP_NAME"; then
+            APP_NAME="247B"
+            if pm2 list | grep -q "$APP_NAME"; then
             echo "Reloading existing PM2 process..."
             pm2 reload "$APP_NAME" --update-env
-          else
+            else
             echo "Starting new PM2 process..."
-            pm2 start npm --name "$APP_NAME" -- run dev
-          fi
+            pm2 start npm --name "$APP_NAME" -- run start
+            fi
 
-          # Enable PM2 startup for Amazon Linux systemd
-          pm2 startup systemd -u ec2-user --hp /home/ec2-user || true
-          pm2 save
-          pm2 status
+            pm2 startup systemd -u ec2-user --hp /home/ec2-user || true
+            pm2 save
+            pm2 status
+
