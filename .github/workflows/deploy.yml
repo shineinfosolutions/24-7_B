@@ -15,7 +15,8 @@ jobs:
       - name: Checkout latest code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+          clean: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # 2️⃣ Setup Node.js (for Amazon Linux)
